@@ -1,0 +1,185 @@
+================================================================================
+  GHID SETUP WHATSAPP NOTIFICARI
+================================================================================
+
+Pentru a configura WhatsApp pe langa NTFY existent, ai mai multe optiuni:
+
+================================================================================
+  OPTIUNEA 1: CALLMEBOT (CEL MAI SIMPLU - RECOMANDAT)
+================================================================================
+
+PENTRU A CONFIGURA CALLMEBOT:
+
+1. Mergi la: https://www.callmebot.com/
+2. Login cu Facebook
+3. Obtine API_KEY
+4. Copiaza API_KEY
+
+ACUM CONFIGUREAZA PE SERVER:
+
+1. SSH la server:
+   ssh root@185.182.121.45
+
+2. Creeaza script WhatsApp:
+   cat > /usr/local/bin/whatsapp_send.sh <<'EOF'
+#!/bin/bash
+API_KEY="API_KEY_TAU_AICI"
+message="$1"
+curl -s "https://api.callmebot.com/whatsapp.php?apikey=${API_KEY}&text=${message}"
+EOF
+   chmod +x /usr/local/bin/whatsapp_send.sh
+
+3. Testeaza:
+   /usr/local/bin/whatsapp_send.sh "Test WhatsApp!"
+
+4. VERIFICA TELEFONUL - Ar trebui sa primesti mesaj pe WhatsApp!
+
+PENTRU A ADAUGA LA BACKUP:
+
+1. Modifica /exlibris/backup/scripts/backup_mailer:
+   - Adauga linia dupa "mailx":
+     /usr/local/bin/whatsapp_send.sh "${SUBJECT} ${BACKUP_TYPE}"
+
+CAND VEI PRIMI NOTIFICARI:
+- La fiecare backup (23:00, 22:00, 03:00)
+- Mesaj: "Backup was successful on: [data]"
+- SAU: "Backup error on: [data]"
+
+================================================================================
+  OPTIUNEA 2: TWILIO WHATSAPP API
+================================================================================
+
+PENTRU A CONFIGURA TWILIO:
+
+1. Mergi la: https://www.twilio.com/try-twilio
+2. Creeaza cont FREE (nu costa pentru test)
+3. Verifica telefonul
+4. In Twilio Console ia:
+   - Account SID
+   - Auth Token
+   - Twilio Number
+
+ACUM CONFIGUREAZA PE SERVER:
+
+1. SSH la server:
+   ssh root@185.182.121.45
+
+2. Creeaza script Twilio:
+   cat > /usr/local/bin/whatsapp_twilio.sh <<'EOF'
+#!/bin/bash
+ACCOUNT_SID="SID_TAU"
+AUTH_TOKEN="TOKEN_TAU"
+TWILIO_NUM="NUMARUL_TWILIO"
+RECIPIENT="NUMARUL_TAU_WHATSAPP"
+message="$1"
+
+curl -s -X POST "https://api.twilio.com/2010-04-01/Accounts/${ACCOUNT_SID}/Messages.json" \
+  --data-urlencode "From=whatsapp:${TWILIO_NUM}" \
+  --data-urlencode "To=whatsapp:${RECIPIENT}" \
+  --data-urlencode "Body=${message}" \
+  -u "${ACCOUNT_SID}:${AUTH_TOKEN}"
+EOF
+   chmod +x /usr/local/bin/whatsapp_twilio.sh
+
+3. Testeaza:
+   /usr/local/bin/whatsapp_twilio.sh "Test Twilio!"
+
+================================================================================
+  OPTIUNEA 3: WHATSAPP BUSINESS API
+================================================================================
+
+PENTRU A CONFIGURA WHATSAPP BUSINESS API:
+
+1. Mergi la: https://business.whatsapp.com/
+2. Creeaza cont business (FREE)
+3. Configureaza API
+4. Obtine API credentials
+
+ACUM CONFIGUREAZA PE SERVER:
+
+1. SSH la server:
+   ssh root@185.182.121.45
+
+2. Creeaza script:
+   cat > /usr/local/bin/whatsapp_business.sh <<'EOF'
+#!/bin/bash
+API_URL="https://graph.facebook.com/v17.0/YOUR_PHONE_ID/messages"
+ACCESS_TOKEN="TOKEN_TAU"
+RECIPIENT="NUMARUL_TAU"
+message="$1"
+
+curl -s -X POST "${API_URL}" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d "{\"messaging_product\":\"whatsapp\",\"to\":\"${RECIPIENT}\",\"text\":{\"body\":\"${message}\"}}"
+EOF
+   chmod +x /usr/local/bin/whatsapp_business.sh
+
+3. Testeaza:
+   /usr/local/bin/whatsapp_business.sh "Test Business!"
+
+================================================================================
+  COMPARATIE OPTIUNI
+================================================================================
+
+CALLMEBOT:
++ Cea mai simpla
++ GRATUIT
++ Setup in 2 minute
++ Nu necesita conturi complexe
+- Limitat la 1 numar
+- HTTP only (nu HTTPS)
+
+TWILIO:
++ Profesional
++ Scalabil
++ Suporta multiple numere
++ HTTPS sigur
+- Necesita cont Twilio (FREE pentru test)
+- Setup mai complex
+
+WHATSAPP BUSINESS API:
++ Oficial de la Meta
++ Enterprise ready
++ Suporta toate feature-urile
+- Necesita business account
+- Setup foarte complex
+
+================================================================================
+  RECOMANDARE
+================================================================================
+
+PENTRU TINE (avand deja NTFY):
+
+1. NTFY FUNCTIONEAZA PERFECT!
+   - Notificari instant
+   - GRATUIT
+   - Fara limitari
+   - Fara setup complex
+
+2. DACa vrei WhatsApp, recomand Callmebot:
+   - Cea mai simpla
+   - GRATUIT
+   - Setup instant
+   - Compatibil cu serverul tau vechi
+
+3. DACa vrei si altii sa primeasca:
+   - Foloseste ACELASI TOPIC NTFY: bariasi-5f07b8571f7c
+   - Sau creeaza topic-uri separate
+   - Sau configureaza Callmebot pentru fiecare
+
+================================================================================
+  FINAL
+================================================================================
+
+NTFY este deja configurat si functioneaza perfect!
+
+Daca vrei WhatsApp de curiozitate sau pentru altii care nu vor NTFY,
+foloseste Callmebot (cea mai simpla varianta).
+
+Sau pastreaza NTFY care functioneaza excelent si adauga-o si la altii!
+
+================================================================================
+END OF GUIDE
+================================================================================
+
