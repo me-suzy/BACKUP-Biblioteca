@@ -1,0 +1,113 @@
+PROBLEMA: De ce nu am primit notificare la backup real
+========================================================
+
+ANALIZA PROBLEMEI:
+------------------
+1. Serverul trimite notificari test (verified) - primiti mesajele de test
+2. backup_mailer foloseste C-shell (#!/bin/csh)
+3. Linia NTFY foloseste sintaxa bash - incompatibila cu C-shell
+4. Ultimul backup: 25 oct 22:08 (sambata)
+5. Backup-urile ruleaza:
+   - Luni-Vineri: 23:00
+   - Sambata: 22:00
+   - Duminica: 22:00
+
+PROBLEMA IDENTIFICATA:
+----------------------
+Linia NTFY in backup_mailer foloseste sintaxa bash:
+  echo "..." | /usr/local/bin/ntfy_notify.sh
+
+Dar backup_mailer foloseste C-shell (#!/bin/csh)
+
+In C-shell, sintaxa ${VARIABILA} nu functioneaza - trebuie $VARIABILA
+
+SOLUTIE:
+--------
+Linia corecta pentru C-shell:
+
+echo "BACKUP: $BACKUP_TYPE | DB: $ORACLE_SID | CODE: $ERROR_NUMBER | TIME: `/bin/date '+%Y-%m-%d %H:%M:%S'` | STATUS: $ERROR_MESSAGE" | /usr/local/bin/ntfy_notify.sh
+
+UNDE SA MODIFICAM:
+------------------
+Fisier: /exlibris/backup/scripts/backup_mailer
+Linia: 99
+
+Cum corectez:
+1. Deschizi fisierul: vi /exlibris/backup/scripts/backup_mailer
+2. Mergi la linia 99
+3. Inlocuieste linia cu versiunea corecta de mai sus
+4. Salvezi (:wq)
+
+SAU folosesti scriptul Python de mai jos.
+
+
+SCRIPT PYTHON PENTRU CORECTARE:
+--------------------------------
+import paramiko
+
+HOST = "185.182.121.45"
+USER = "root"
+PASS = "YOUR-PASSWORD"
+
+ssh = paramiko.SSHClient()
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+ssh.connect(HOST, 22, USER, PASS)
+
+# Linia corecta
+new_line = 'echo "BACKUP: $BACKUP_TYPE | DB: $ORACLE_SID | CODE: $ERROR_NUMBER | TIME: `/bin/date \\'+%Y-%m-%d %H:%M:%S\\'` | STATUS: $ERROR_MESSAGE" | /usr/local/bin/ntfy_notify.sh'
+
+# Inlocuieste linia 99
+ssh.exec_command(f"sed -i '99c\\{new_line}' /exlibris/backup/scripts/backup_mailer")
+
+ssh.close()
+
+
+MESAJUL PRIMIT LA BACKUP:
+--------------------------
+BACKUP: FULL | DB: ALEPH | CODE: 00 | TIME: 2025-10-28 01:23:45 | STATUS: End FULL backup
+
+- BACKUP: tip backup (FULL, INCREMENTAL, etc.)
+- DB: Oracle SID (ALEPH)
+- CODE: cod eroare (00 = success, 01-14 = error)
+- TIME: timestamp EXACT
+- STATUS: mesaj detaliat
+
+TESTARE:
+--------
+Dupa ce corectezi linia:
+1. Astepti urmatorul backup (luni 27 oct la 23:00 SAU miercuri 29 oct la 23:00)
+2. Sau rulezi manual backup pentru test
+3. Ar trebui sa primesti notificare pe telefon
+
+VERIFICARE:
+-----------
+Test manual:
+ssh root@185.182.121.45
+cat > /tmp/test_backup.sh << 'EOF'
+#!/bin/csh
+set BACKUP_TYPE="FULL"
+set ORACLE_SID="ALEPH"
+set ERROR_NUMBER="00"
+set ERROR_MESSAGE="End FULL backup"
+
+echo "BACKUP: $BACKUP_TYPE | DB: $ORACLE_SID | CODE: $ERROR_NUMBER | TIME: `/bin/date '+%Y-%m-%d %H:%M:%S'` | STATUS: $ERROR_MESSAGE" | /usr/local/bin/ntfy_notify.sh
+EOF
+
+chmod +x /tmp/test_backup.sh
+/tmp/test_backup.sh
+
+Verifica telefonul - ar trebui sa primesti notificare cu mesajul complet!
+
+
+STATUS ACTUAL:
+--------------
+- NTFY functioneaza: DA (primiti notificari test)
+- backup_mailer configurat: DA (linia exista)
+- Sintaxa corecta: NU (foloseste bash in loc de csh)
+- Primiti notificari la backup: NU (din cauza sintaxei)
+
+NEXT STEP:
+----------
+Corectezi linia 99 din backup_mailer cu sintaxa C-shell corecta
+si testezi la urmatorul backup!
+
