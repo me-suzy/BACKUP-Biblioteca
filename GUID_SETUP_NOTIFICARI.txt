@@ -1,0 +1,254 @@
+================================================================================
+  GHID COMPLET SETUP NOTIFICARI PENTRU SERVER LINUX
+================================================================================
+
+Acest ghid contine toti pasii urmati pentru instalarea sistemului de notificari
+NTFY pe serverul Linux cu cron jobs pentru backup.
+
+================================================================================
+  PARTEA 1: INSTALARE APLICATIE NTFY PE TELEFON
+================================================================================
+
+1. DESCARCA aplicatia NTFY:
+   - Android: https://play.google.com/store/apps/details?id=io.heckel.ntfy
+   - iOS: https://apps.apple.com/app/ntfy/id1625396347
+
+2. DESCHIDE aplicatia NTFY pe telefon
+
+3. ADAUGA SUBSCRIBE la tema:
+   - Tema: bariasi-5f07b8571f7c
+   - Click pe "Add" sau "Subscribe"
+   - Vei primi notificari de pe server!
+
+================================================================================
+  PARTEA 2: INSTALARE SCRIPT PE SERVER
+================================================================================
+
+1. SSH LA SERVER:
+   ssh root@185.182.121.45
+
+2. CREARE SCRIPT NTFY:
+   - Script creat: /usr/local/bin/ntfy_notify.sh
+   - Compatibil cu OpenSSL vechi si curl 7.12.1
+   - Foloseste HTTP (fara HTTPS) pentru compatibilitate
+
+3. INTEGRARE IN BACKUP:
+   - Script modificat: /exlibris/backup/scripts/backup_mailer
+   - Backup original: /exlibris/backup/scripts/backup_mailer.backup
+   - Notificari trimise automat la fiecare backup
+
+================================================================================
+  PARTEA 3: PROGRAM BACKUP
+================================================================================
+
+CRON JOBS ACTIVE:
+- Luni-Vineri: 23:00 (backup a1)
+- Sambata: 22:00 (backup a5)
+- Zilnic: 03:00 (tarol backup)
+
+NOTIFICARI PRIMITE:
+- Backup completat cu succes (ERROR 00): "Backup was successful"
+- Backup cu erori (ERROR 01-14): "Backup error on: [tip eroare]"
+
+================================================================================
+  PARTEA 4: CUM SA PRIMEASCA SI ALTII NOTIFICARI
+================================================================================
+
+PENTRU A PERMITE ALTIEI PERSOANE SA PRIMEASCA NOTIFICARI:
+
+OPTIONEA 1: FOLOSESTE ACELASI TOPIC (CEA MAI SIMPLA)
+--------------------------------------------------------------------------------
+
+1. PERSOANA 2 
+
+INSTALEAZA aplicatia NTFY pe telefon/smartphone  
+
+https://play.google.com/store/apps/details?id=io.heckel.ntfy
+
+2. ADAUGA SUBSCRIBE la ACEST TOPIC:
+   - Tema: bariasi-5f07b8571f7c
+   - Click pe "Add" sau "Subscribe"
+
+3. READY! Persoana 2 va primi aceleasi notificari ca tine!
+
+Nota: Poti avea multiple persoane pe acelasi topic NTFY.
+
+
+OPTIONEA 2: CREEAZA TOPIC SEPARAT PENTRU PERSOANA 2
+--------------------------------------------------------------------------------
+
+1. GENEREAZA un topic nou (de exemplu: "bariasi-persoana2-abc123")
+
+2. MODIFICA /exlibris/backup/scripts/backup_mailer:
+   - Inlocuieste topic-ul in scriptul backup_mailer
+   - Sau adauga o a doua linie de notificare pentru topic-ul 2
+
+3. PERSOANA 2 subscribe la noul topic
+
+4. AMANDOI veti primi notificari!
+
+
+OPTIONEA 3: FOLOSESTE DISCORD/SLACK (DACA PREFERI)
+--------------------------------------------------------------------------------
+
+1. CREEAZA un Discord/Slack webhook
+
+2. MODIFICA /exlibris/backup/scripts/backup_mailer sa trimita si Discord
+
+3. DACA FOLOSESTI DISCORD/SLACK:
+   - Notificarile vor merge intr-un canal
+   - Poti adauga membri in canal
+   - Toti membrii canalului vor primi notificari
+
+================================================================================
+  PARTEA 5: TESTARE
+================================================================================
+
+PENTRU A TESTA NOTIFICARILE:
+
+1. Conecteaza-te la server:
+   ssh root@185.182.121.45
+
+2. Trimite notificare test:
+   /usr/local/bin/ntfy_notify.sh "Test notificare!"
+
+3. VERIFICA TELEFONUL:
+   - Ar trebui sa primesti notificare pe NTFY
+   - Mesaj: "Test notificare!"
+
+PENTRU A TESTA BACKUP NOTIFICARII:
+
+1. Asteapta urmatorul backup programat (23:00, 22:00 sau 03:00)
+
+2. SAU ruleaza manual backup:
+   /exlibris/backup/scripts/exec_backup_main a1
+
+3. VERIFICA TELEFONUL:
+   - Ar trebui sa primesti notificare dupa backup
+   - Mesaj: "Backup was successful on: [data]"
+
+================================================================================
+  PARTEA 6: UTILIZARE
+================================================================================
+
+UTILIZARE DIRECTA:
+/usr/local/bin/ntfy_notify.sh "Mesajul tau"
+
+EXEMPLE:
+/usr/local/bin/ntfy_notify.sh "Backup completat!"
+/usr/local/bin/ntfy_notify.sh "Eroare in sistem!"
+/usr/local/bin/ntfy_notify.sh "Server restartat!"
+
+PENTRU CITIRE DIN PIPE:
+echo "Mesaj" | /usr/local/bin/ntfy_notify.sh
+
+PENTRU CRON JOBS:
+0 0 * * * /usr/local/bin/ntfy_notify.sh "Backup completat!"
+
+================================================================================
+  PARTEA 7: PROBLEME SI SOLUTII
+================================================================================
+
+PROBLEMA: Nu primesc notificari
+SOLUTIE:
+1. Verifica ca ai NTFY installata pe telefon
+2. Verifica ca esti subscribe la topic-ul corect: bariasi-5f07b8571f7c
+3. Verifica internet-ul pe telefon
+4. Testeaza: /usr/local/bin/ntfy_notify.sh "Test"
+
+PROBLEMA: Notificarile sunt intarziate
+SOLUTIE:
+- NTFY foloseste HTTP (fara HTTPS) pentru compatibilitate cu OpenSSL vechi
+- Intarzierea este de cateva secunde, normal pentru HTTP
+- Poti optimiza folosind un topic privat sau un server NTFY local
+
+PROBLEMA: Vreau sa modific ora backup-ului
+SOLUTIE:
+1. SSH la server: ssh root@185.182.121.45
+2. Editeaza cron: crontab -e
+3. Modifica ora pentru backup (ex: 22:00 -> 21:00)
+4. Salveaza si iesi: :wq
+
+PROBLEMA: Vreau sa adaug notificari si pentru alte evenimente
+SOLUTIE:
+1. Creeaza script nou sau modifica cel existent
+2. Foloseste: /usr/local/bin/ntfy_notify.sh "Mesaj"
+3. Sau integreaza direct in scriptul evenimentului
+
+================================================================================
+  PARTEA 8: CONFIGURARE AVANSATA
+================================================================================
+
+PENTRU TOPIC PRIVAT (RECOMANDAT PENTRU SECURITATE):
+
+1. Creeaza un topic privat pe ntfy.sh cu password
+
+2. Modifica /usr/local/bin/ntfy_notify.sh sa foloseasca topic-ul privat
+
+3. Foloseste autentificare:
+   curl -u user:pass -X POST -d "mesaj" "https://ntfy.sh/topic-privat"
+
+PENTRU NOTIFICARI CU PRIORITATE:
+
+1. Modifica NTFY script pentru a trimite notificari cu prioritate:
+   curl -H "Priority: high" -d "mesaj" "http://ntfy.sh/topic"
+
+PENTRU NOTIFICARI CU TAGS:
+
+1. Modifica NTFY script pentru a adauga tags:
+   curl -H "Tags: server,linux,critical" -d "mesaj" "http://ntfy.sh/topic"
+
+================================================================================
+  REZUMAT
+================================================================================
+
+CE AM CONFIGURAT:
+- NTFY application pe telefon: bariasi-5f07b8571f7c
+- Script de notificare: /usr/local/bin/ntfy_notify.sh
+- Integrare in backup: /exlibris/backup/scripts/backup_mailer
+- Cron jobs: 23:00 (L-V), 22:00 (S), 03:00 (Zilnic)
+
+CE PRIMEZI:
+- Notificari la fiecare backup
+- Mesaje despre status backup (success/error)
+- Confirmare trimitere backup
+
+CE POTI FACE ACUM:
+- Primesti notificari pe telefon despre backup
+- Poti adauga alte persoane pe acelasi topic
+- Poti crea topic-uri separate pentru diferite evenimente
+- Poti modifica ora/durata backup-ului
+
+================================================================================
+  CONTACT SI SUPPORT
+================================================================================
+
+Pentru probleme sau intrebari:
+- Verifica logs pe server: /var/log/messages
+- Testeaza notificari: /usr/local/bin/ntfy_notify.sh "Test"
+- Verifica cron: crontab -l
+- Verifica backup: /exlibris/backup/scripts/exec_backup_main
+
+Topic NTFY: bariasi-5f07b8571f7c
+Server: 185.182.121.45
+Script: /usr/local/bin/ntfy_notify.sh
+Backup mailer: /exlibris/backup/scripts/backup_mailer
+
+================================================================================
+  FINAL
+================================================================================
+
+Acest ghid contine toti pasii pentru setup-ul notificarilor NTFY pe serverul
+Linux. Sistemul este complet functional si va trimite notificari automat la
+fiecare backup programat.
+
+Pentru a adauga altii la notificari, fie folositi acelasi topic NTFY, fie
+creati topic-uri separate pentru fiecare persoana/echipa.
+
+Sistemul este configurat si testat. Baza de date este protejata prin backup
+zilnic si vei fi notificat de fiecare data cand se executa backup-ul!
+
+================================================================================
+END OF GUIDE
+================================================================================
+
