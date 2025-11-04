@@ -8,13 +8,13 @@ import sys
 import time
 from datetime import datetime
 
-HOST = "185.182.121.45"
+HOST = "85.186.121.42"
 USER = "root"
-PASS = "YOUR-PASSWORD"
+PASS = "ac@demia"
 PORT = 22
 
 # Token Telegram Bot
-TELEGRAM_TOKEN = "7853734044:AAECWtOnW4hT7ba4YD1J6Lijtyb2XgjDzzY"
+TELEGRAM_TOKEN = "YOUR-TOKEN"
 
 
 def ssh_exec(ssh, cmd, show=True, timeout=10):
@@ -169,7 +169,7 @@ if __name__ == "__main__":
             test_message = f"""Test notificare Telegram de pe serverul Linux!
 
 Timestamp: {timestamp}
-Server: 185.182.121.45
+Server: 85.186.121.42
 Token: {TELEGRAM_TOKEN[:20]}...
 
 Acesta este un test pentru a verifica ca Telegram Bot functioneaza!
