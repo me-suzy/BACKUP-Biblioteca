@@ -1,0 +1,289 @@
+================================================================================
+  INSTRUCTIUNI COMPLETE PENTRU CONFIGURARE WHATSAPP CU TWILIO
+================================================================================
+
+ACUM CA AI TWILIO ACCOUNT, URMEAZA PASII ACESTIA:
+
+================================================================================
+  PASUL 1: CONFIGUREAZA WHATSAPP SANDBOX
+================================================================================
+
+IN TWILIO CONSOLE:
+
+1. Mergi la "Messaging" din sidebar-ul stang
+
+2. Click pe "Try it out" sau "Get Started with WhatsApp"
+
+3. Configureaza WhatsApp Sandbox:
+   - Vei primi un COD (ex: "join XY-ABCD")
+   - Copiaza acest COD
+
+4. DESCHIDE WHATSAPP pe telefon
+
+5. Trimite CODUL catre numarul specificat de Twilio
+   (ex: +1 415 523 8886 sau altul)
+
+6. TRIMITE: "join XY-ABCD" (sau codul tau)
+
+7. CONFIRMA pe WhatsApp pentru activare!
+
+8. DACA ESTE ACTIVAT:
+   - Twilio va spune "Sandbox configured"
+   - Poti trimite mesaje din Sandbox
+
+================================================================================
+  PASUL 2: OBTINE CREDENTIALELE DIN TWILIO
+================================================================================
+
+ACCOUNT SID:
+------------
+1. In Twilio Console, coltul de sus dreapta
+2. Sub "Account Info" sau "My First Twilio account"
+3. Copy "Account SID"
+4. Exemplu: ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+AUTH TOKEN:
+-----------
+1. Click pe iconita "show" sau "view" langa Auth Token
+2. Copy "Auth Token"
+3. Exemplu: abc123def456ghi789jkl012mno345
+
+TWILIO WHATSAPP NUMBER (SANDBOX):
+----------------------------------
+1. In Sandbox WhatsApp configurare
+2. Mergi la "Send a message"
+3. Copiaza "From" number
+4. Exemplu: whatsapp:+14155238886
+   SAU: +14155238886 (doar numarul)
+
+RECIPIENT (NUMARUL TAU):
+-------------------------
+1. Numărul tau de telefon cu WhatsApp
+2. Format: +[cod tara][numar]
+3. Exemplu: +40723123456 (pentru Romania)
+
+================================================================================
+  PASUL 3: CONFIGUREAZA PE SERVER
+================================================================================
+
+CONECTEAZA-TE LA SERVER:
+
+ssh root@185.182.121.45
+Password: YOUR-PASSWORD
+
+
+ACUM MODIFICA SCRIPTUL (inlocuieste valorile!):
+
+cat > /usr/local/bin/whatsapp_send.sh <<'EOFTW'
+#!/bin/bash
+
+# PASTE AICI ACCOUNT SID
+ACCOUNT_SID="PASTE_AICI_ACCOUNT_SID"
+
+# PASTE AICI AUTH TOKEN
+AUTH_TOKEN="PASTE_AICI_AUTH_TOKEN"
+
+# PASTE AICI TWILIO WHATSAPP NUMBER (ex: whatsapp:+14155238886)
+TWILIO_NUM="PASTE_AICI_WHATSAPP_NUMBER"
+
+# PASTE AICI NUMARUL TAU (ex: +40723123456)
+RECIPIENT="PASTE_AICI_NUMARUL_TAU"
+
+send_whatsapp() {
+    local message="$1"
+    
+    # Trimite mesaj prin Twilio WhatsApp API
+    curl -s -X POST "https://api.twilio.com/2010-04-01/Accounts/${ACCOUNT_SID}/Messages.json" \
+        --data-urlencode "From=${TWILIO_NUM}" \
+        --data-urlencode "To=${RECIPIENT}" \
+        --data-urlencode "Body=${message}" \
+        -u "${ACCOUNT_SID}:${AUTH_TOKEN}" \
+        > /dev/null 2>&1
+    
+    if [ $? -eq 0 ]; then
+        echo "WhatsApp notification sent successfully"
+    else
+        echo "Failed to send WhatsApp notification"
+    fi
+}
+
+if [ -z "$1" ]; then
+    echo "Usage: whatsapp_send.sh <message>"
+    exit 1
+fi
+
+send_whatsapp "$1"
+EOFTW
+
+chmod +x /usr/local/bin/whatsapp_send.sh
+
+
+TESTEAZA:
+
+/usr/local/bin/whatsapp_send.sh "Test WhatsApp de pe server!"
+
+
+VERIFICA TELEFONUL:
+- Ar trebui sa primesti mesaj pe WhatsApp!
+- De la numarul Twilio Sandbox
+
+================================================================================
+  PASUL 4: ADAUGA LA BACKUP
+================================================================================
+
+PENTRU A TRIMITE WHATSAPP LA FIECARE BACKUP:
+
+1. Editeaza scriptul de backup:
+   nano /exlibris/backup/scripts/backup_mailer
+
+2. Gaseste linia cu "mailx":
+   /bin/cat /tmp/tmpmail${BKP_SLOT} | mailx -s "$SUBJECT  $BACKUP_TYPE " "$BKP_MAIL"
+
+3. ADAUGA DUPACE LINIA MAIL:
+   /usr/local/bin/whatsapp_send.sh "${SUBJECT} ${BACKUP_TYPE}: ${ERROR_MESSAGE}"
+
+4. Salveaza: Ctrl+O, Enter, Ctrl+X
+
+5. TESTEAZA:
+   /exlibris/backup/scripts/exec_backup_main a1
+
+6. VERIFICA:
+   - Email primit
+   - NTFY primit (daca e configurat)
+   - WHATSAPP primit!
+
+================================================================================
+  IMPORTANT FORMAT NUMERE
+================================================================================
+
+ATENTIE LA FORMAT NUMERELOR:
+
+TWILIO_NUM (din Sandbox):
+- Format COMPLET: whatsapp:+14155238886
+- SAU doar numar: +14155238886
+- TREBUIE SA AIE "+" IN FRENTE!
+
+RECIPIENT (numarul tau):
+- Format: +40723123456
+- + = plus
+- 40 = cod tara Romania
+- 723123456 = numarul tau
+
+EXEMPLU PENTRU ROMANIA:
+- Twilio: whatsapp:+14155238886
+- Recipient: +40723123456
+
+================================================================================
+  TROUBLESHOOTING
+================================================================================
+
+PROBLEMA: "Invalid To number"
+SOLUTIE:
+- Verifica format numar: +[cod tara][numar]
+- Nu lasa spatii in numar
+- Foloseste format exact: +40723123456
+
+PROBLEMA: "Authentication failed"
+SOLUTIE:
+- Verifica Account SID si Auth Token
+- Copy exact din Twilio Console
+- Nu lasa spatii extra
+
+PROBLEMA: "Not sending"
+SOLUTIE:
+- Verifica ca Sandbox este activat
+- Trimite "join XY-ABCD" pe WhatsApp
+- Confirma activarea in Twilio
+
+PROBLEMA: "Can't connect"
+SOLUTIE:
+- Verifica ca serverul are internet
+- ping 8.8.8.8
+- Verifica curl: which curl
+
+================================================================================
+  COSTURI TWILIO
+================================================================================
+
+SANDBOX (TESTING):
+- GRATUIT
+- Limitat la numarul de test configurat
+- Perfect pentru development
+
+PRODUCTION:
+- $0.005 per mesaj text
+- $0.0065 per multimedia
+- Foarte ieftin pentru production
+
+UPGRADE ACCOUNT:
+- Cand esti gata pentru production
+- Upgrade contul din Twilio Console
+- Cheltuiesti doar cat folosesti
+
+================================================================================
+  EXEMPLE UTILIZARE
+================================================================================
+
+TRIMITE NOTIFICARE MANUAL:
+/usr/local/bin/whatsapp_send.sh "Backup completat!"
+
+PENTRU CRON (backup zilnic):
+0 0 * * * /usr/local/bin/whatsapp_send.sh "Backup zilnic completat!"
+
+INTEGRARE IN SCRIPT:
+/usr/local/bin/whatsapp_send.sh "${SUBJECT} ${BACKUP_TYPE}"
+
+PENTRU ERORI:
+/usr/local/bin/whatsapp_send.sh "Eroare backup: ${ERROR_MESSAGE}"
+
+================================================================================
+  REZUMAT PASI COMPLETE
+================================================================================
+
+1. IN TWILIO CONSOLE:
+   - Mergi la "Messaging"
+   - Click "Try WhatsApp"
+   - Copiaza COD "join XX-YY"
+   - Trimite COD pe WhatsApp
+   - Confirma activarea
+
+2. OBTINE CREDENTIALE:
+   - Account SID (coltul de sus)
+   - Auth Token (click Show)
+   - WhatsApp Number (din Sandbox)
+   - Recipient Number (numarul tau)
+
+3. PE SERVER:
+   - SSH: ssh root@185.182.121.45
+   - Creeaza script cu valorile de mai sus
+   - chmod +x /usr/local/bin/whatsapp_send.sh
+   - Testeaza: /usr/local/bin/whatsapp_send.sh "Test"
+
+4. VERIFICA:
+   - Primesti mesaj pe WhatsApp
+   - De la numarul Twilio Sandbox
+
+5. ADAUGA LA BACKUP:
+   - Editeaza backup_mailer
+   - Adauga linia cu whatsapp_send.sh
+
+================================================================================
+  FINAL
+================================================================================
+
+DACA AI PROBLEME:
+
+1. Verifica Sandbox activat in Twilio
+2. Verifica format numere (+cod tara)
+3. Verifica credentialele (Account SID, Auth Token)
+4. Testeaza manual: /usr/local/bin/whatsapp_send.sh "Test"
+5. Verifica logs: tail -f /var/log/messages
+
+ALTERNATIVE DACA TWILIO NU FUNCTIONEAZA:
+- Callmebot: https://www.callmebot.com/
+- NTFY: bariasi-5f07b8571f7c (deja configurat)
+
+================================================================================
+END OF INSTRUCTIONS
+================================================================================
+
