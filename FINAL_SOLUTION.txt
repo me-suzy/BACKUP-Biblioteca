@@ -1,0 +1,47 @@
+SOLUTIE FINALA - PROBLEMA NOTIFICARI BACKUP
+============================================
+
+PROBLEMA:
+---------
+1. Mesajul "Server notification" apare pentru ca linia NTFY nu functioneaza corect
+2. Sintaxa actuala foloseste bash in context C-shell
+3. Testul meu trimitea "Server notification" pentru ca mesajul era gol
+
+SOLUTIE:
+--------
+Linia din backup_mailer trebuie sa fie CORECTA pentru C-shell.
+
+Linia ACTUALA (NEFUNCțIONALA):
+echo "Backup: $BACKUP_TYPE | Database: $ORACLE_SID | Status: OK (Code $ERROR_NUMBER) | Time: $(/bin/date +%Y-%m-%d\ %H:%M:%S)" | /usr/local/bin/ntfy_notify.sh
+
+Linia CORECTA pentru C-shell:
+echo "Backup $BACKUP_TYPE completed | Database: $ORACLE_SID | Code: $ERROR_NUMBER | $(date +%Y-%m-%d\\ %H:%M%S)" | /usr/local/bin/ntfy_notify.sh
+
+SAU MAI SIMPLU:
+echo "Backup: $BACKUP_TYPE | DB: $ORACLE_SID | Code: $ERROR_NUMBER" | /usr/local/bin/ntfy_notify.sh
+
+CUM SA MODIFICAM:
+----------------
+1. ssh root@185.182.121.45
+2. vi /exlibris/backup/scripts/backup_mailer
+3. Mergi la linia 97
+4. Inlocuieste linia cu una din cele de mai sus
+5. Salveaza (:wq)
+
+NOTIFICAREA DIN 06:03:
+----------------------
+Este din ultimul test (find_and_fix_server_notifications.py)
+Dupa asta NU MAI TRIMIT teste!
+
+ACUM:
+-----
+- NU mai trimit teste
+- Proximul backup: luni 27 oct la 23:00
+- Vei primi notificare reala
+- Format: Backup: FULL | DB: ALEPH | Code: 00
+
+DACA APARE INCA "SERVER NOTIFICATION":
+--------------------------------------
+Corectezi linia 97 manual cu una din variantele de mai sus.
+Sau ma anunti si o corectez eu.
+
