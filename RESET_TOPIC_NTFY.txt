@@ -1,0 +1,33 @@
+INSTRUCTIUNI RESET TOPIC NTFY
+================================
+
+Pentru a elimina notificarile vechi "Server notification" din topic-ul NTFY,
+trebuie sa resetezi topic-ul in aplicatia de telefon.
+
+PASII:
+
+1. Deschide aplicatia NTFY pe telefon
+2. Gaseste topic-ul "bariasi-5f07b8571f7c"
+3. Apasa "Manage topic" sau "Settings"
+4. Cauta optiunea "Clear notifications" sau "Delete messages"
+5. Confirma stergerea
+
+DUPA CE RESETEZI TOPIC-UL:
+
+- Nu vei mai primi notificari vechi "Server notification"
+- Vei primi DOAR notificari noi de la backup real
+- Mesajul va fi complet cu informatii:
+  "BACKUP: FULL | DB: ALEPH | CODE: 00 | TIME: 2025-10-28 01:23:45 | STATUS: End FULL backup"
+
+CAND VA RULA BACKUP-UL:
+
+- O singura notificare
+- Intre orele 23:00-02:00
+- Cu timestamp EXACT (momentul backup-ului)
+- Cu informatiile complete de mai sus
+
+INFORMATIE UNICA:
+
+Timestamp-ul este ALWAYS diferit, deci nu poate fi notificare "fara sens".
+Codul eroare (00 = success) confirma ca backup-ul s-a terminat.
+Tipul backup (FULL, INCREMENTAL) confirma tipul backup-ului.
