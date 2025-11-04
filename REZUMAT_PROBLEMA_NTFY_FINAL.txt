@@ -1,0 +1,43 @@
+PROBLEMA IDENTIFICATA - 29 OCT 00:45
+====================================
+
+DIAGNOSTIC:
+-----------
+1. Backup-ul de la 23:54 a ESUAT
+   - Eroare: "if: Expression Syntax"
+   - Eroare: "tar command failed {status=1}"
+   - Deci backup_mailer nu a fost apelat
+
+2. Scriptul NTFY NU CITESTE STDIN corect
+   - Problema: logica `[ -t 0 ]` nu functioneaza in c-shell
+   - Rezultat: afiseaza "Server notification" in loc de mesajul real
+
+3. LINIA NTFY EXISTA in backup_mailer
+   - Linia 9: echo "..." | /usr/local/bin/ntfy_notify.sh
+   - Dar scriptul NTFY nu proceseaza mesajul corect
+
+SOLUTIE:
+--------
+Scriptul NTFY a fost FIXAT cu logica corecta:
+- Verifica daca exista stdin
+- Citeste mesajul corect din pipe
+- Trimitere corecta la NTFY
+
+TESTE NECESARE:
+--------------
+1. Test cu argument
+2. Test cu pipe stdin  
+3. Test cu comanda exacta din backup_mailer
+
+URMATORII PASI:
+--------------
+1. Verifica ca backup-ul zilnic ruleaza la 22:00 si 23:00
+2. Daca backup-ul este SUCCES, va fi apelat backup_mailer
+3. backup_mailer va trimite notificare NTFY detaliata
+4. Scriptul NTFY fixat va procesa mesajul corect
+
+NOTA:
+-----
+Problema: backup-ul a esuat, deci NU are ce sa notifice.
+Trebuie sa rulam un backup REUSIT pentru a testa notificarea.
+
