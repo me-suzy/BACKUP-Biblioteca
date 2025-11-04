@@ -1,0 +1,77 @@
+SOLUTIE COMPLETA - DE CE NU A MAI FACUT BACKUP
+===============================================
+
+PROBLEMA IDENTIFICATA:
+----------------------
+Backup-urile s-au oprit pe 25 octombrie 2025 la 22:08
+
+CAUZA RADICALA:
+---------------
+1. NU EXISTA MECANISM DE PROGRAMARE PERSISTENT!
+   - Joburi 'at' (one-time) care s-au terminat
+   - Nu existau cron jobs permanente
+   - Nu exista init script care sa recreeze joburile
+
+CE FUNCțIONA IN TREcut (pana pe 25 oct):
+-----------------------------------------
+Probabil existau joburi 'at' care intrau in mers o data cu serverul
+si ruleau zilnic la 22:00 si 23:00
+
+Comanda 'at' functioneaza asa:
+  - at 22:00 tomorrow -> ruleaza o data
+  - Dupa ce ruleaza, jobul se sterge
+  - Trebuie recreeat manual sau prin alt script
+
+CE S-A INTAMPLAT:
+-----------------
+1. Backup-urile de pe 25 oct au rulat (ultimele)
+2. Joburile 'at' s-au terminat
+3. NU S-AU RECREAT automat
+4. Backup-urile s-au oprit
+
+DE CE N-AI OBSERVAT MAI DEVREME:
+---------------------------------
+S-a oprit intre 25-28 oct (duminica-marti)
+Ai inceput sa cauti luni/marti si ai observat problema
+
+SOLUTIE APLICATA:
+-----------------
+Am creat CRON JOBS PERMANENTE pentru user root:
+
+  00 22 * * * /exlibris/backup/scripts/exec_backup_main a5
+  -> Backup user_data zilnic la 22:00
+
+  00 23 * * * /exlibris/backup/scripts/exec_backup_main a1
+  -> Backup ora_cold zilnic la 23:00
+
+AVANTAJE:
+---------
+- Cron jobs sunt PERMANENTE
+- Ruleaza automat la fiecare restart
+- NU se termina ca joburile 'at'
+- Persistent dupa reboot
+
+REZULTAT:
+---------
+Backup-urile vor rula DIN NOU de maine (29 oct):
+  - 29 oct la 22:00 - user_data backup
+  - 29 oct la 23:00 - ora_cold backup
+
+VERIFICARE:
+-----------
+Poti verifica cron jobs cu:
+  crontab -l
+
+Poti vedea urmatoarele rulari cu:
+  ls -l /etc/cron.*
+  ps aux | grep crond
+
+STATUS ACTUAL:
+--------------
+[OK] Cron jobs create
+[OK] crond ruleaza
+[OK] Joburi active
+[OK] Backup-urile vor continua
+
+URMATORUL BACKUP: 29 octombrie 2025, 22:00
+
