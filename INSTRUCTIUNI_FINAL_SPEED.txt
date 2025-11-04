@@ -1,0 +1,59 @@
+INSTRUCTIUNI FINALE - ADD LINIA NTFY IN BACKUP_MAILER
+======================================================
+
+PAȘI:
+-----
+1. Deschide PowerShell
+
+2. Conecteaza-te:
+   ssh root@185.182.121.45
+
+3. Deschide fisierul:
+   vi /exlibris/backup/scripts/backup_mailer
+
+4. Mergi la linia 96:
+   - Apasa ESC (sa iesi din insert mode)
+   - Tasteaza: 96G
+   - Sau: :96
+
+5. Verifica ca vezi linia:
+   /bin/cat /tmp/tmpmail${BKP_SLOT} | mailx -s "$SUBJECT  $BACKUP_TYPE " "$BKP_MAIL"
+
+6. Mergi la linia urmatoare (dupa mailx):
+   - Apasa DOWN ARROW sau j
+
+7. Adauga linia NTFY:
+   - Apasa: i (insert mode)
+   - Pasteaza sau tasteaza linia:
+     echo "BACKUP: $BACKUP_TYPE | DB: $ORACLE_SID | CODE: $ERROR_NUMBER | TIME: `/bin/date '+%Y-%m-%d %H:%M:%S'` | STATUS: $ERROR_MESSAGE" | /usr/local/bin/ntfy_notify.sh
+   - Apasa ENTER
+
+8. Salveaza si iesi:
+   - Apasa ESC
+   - Tasteaza: :wq
+   - Apasa ENTER
+
+9. Verifica:
+   grep -n "ntfy_notify" /exlibris/backup/scripts/backup_mailer
+
+   Ar trebui sa vezi linia cu ntfy_notify (aproximativ linia 97)
+
+10. Testeaza:
+    cat > /tmp/test_ntfy_final.sh << 'EOF'
+    #!/bin/csh
+    set BACKUP_TYPE="FULL"
+    set ORACLE_SID="ALEPH"
+    set ERROR_NUMBER="00"
+    set ERROR_MESSAGE="End FULL backup"
+    echo "BACKUP: $BACKUP_TYPE | DB: $ORACLE_SID | CODE: $ERROR_NUMBER | TIME: \`/bin/date '+%Y-%m-%d %H:%M:%S'\` | STATUS: $ERROR_MESSAGE" | /usr/local/bin/ntfy_notify.sh
+    EOF
+    chmod +x /tmp/test_ntfy_final.sh
+    /tmp/test_ntfy_final.sh
+
+11. Verifica telefonul - ar trebui sa primesti notificare corecta!
+
+GATA!
+-----
+Dupa ce ai adaugat linia, la urmatorul backup (29 oct la 00:00-03:00)
+vei primi notificare corecta!
+
