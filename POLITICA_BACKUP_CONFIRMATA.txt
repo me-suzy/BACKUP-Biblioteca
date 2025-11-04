@@ -1,0 +1,35 @@
+POLITICA BACKUP CONFIRMATA
+===========================
+
+COMPORTAMENT ACTUAL:
+-------------------
+✓ Backup zilnic la 22:00 si 23:00
+✓ Istoric complet pastrat (23, 24, 25 oct...)
+✓ Nu se sterge NIMIC
+✓ Fișiere noi adaugate zilnic
+✓ Retentie: Nelimitata (sau pana cand spatiul este plin)
+
+TIPURI BACKUP:
+-------------
+1. user_data_a5 (22:00)
+   - ~1.8 GB
+   - Format: user_data_a5_YYMMDD_HHMM.tar.gz_aa
+
+2. ora_cold (23:00) 
+   - ~2.1 GB
+   - Format: ALEPH20_11_ora_cold_YYYYMMDD_XXXX_Y
+
+NOTIFICARI NTFY:
+---------------
+✓ Configurate pentru fiecare backup
+✓ Informeaza despre succes sau eroare
+✓ Pornesc automat dupa fiecare backup finalizat
+
+URMATORUL BACKUP:
+----------------
+29 Octombrie 2025:
+  - 22:00 - user_data_a5
+  - 23:00 - ora_cold
+
+SISTEM OPERATIONAL SI CONFIGURAT CORECT!
+
