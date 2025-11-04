@@ -1,0 +1,55 @@
+INSTRUCTIUNI UPLOAD LA GITHUB
+================================
+
+Repository: https://github.com/me-suzy/linux-backup-ntfy-detailed
+Folder: github_template_2_sanitized/
+
+FISIERE PENTRU UPLOAD:
+-----------------------
+1. setup_ntfy_notifications.py
+2. integrate_ntfy_backup.py
+3. final_fix_ntfy_single.py
+4. verify_final_ntfy.py
+5. cleanup_old_test_scripts.py
+6. check_all_ntfy_scripts.py
+7. final_ntfy_test.py
+8. read_backup_and_create_detailed_ntfy.py
+9. add_detailed_ntfy_to_backup.py
+10. verify_ntfy_in_backup.py
+11. GUID_SETUP_NOTIFICARI.txt
+12. EXEMPLU_NOTIFICARE_BACKUP.md
+13. README.md
+14. LICENSE
+15. .gitignore
+
+OPTIUNI UPLOAD:
+----------------
+
+OPTION 1: GitHub Desktop
+- Clone repository in GitHub Desktop
+- Copy toate fisierele din github_template_2_sanitized/
+- Commit si Push
+
+OPTION 2: Upload manual pe GitHub
+- Deschide https://github.com/me-suzy/linux-backup-ntfy-detailed
+- Click "Add file" > "Upload files"
+- Drag & drop toate fisierele din github_template_2_sanitized/
+- Commit
+
+OPTION 3: Git CLI
+cd github_template_2_sanitized
+git init
+git add .
+git commit -m "Initial commit - Linux backup NTFY notifications"
+git remote add origin https://github.com/me-suzy/linux-backup-ntfy-detailed.git
+git push -u origin main
+
+FISIERE SANITIZATE:
+-------------------
+- Toate fisierele au fost sanitized
+- IP-uri inlocuite cu YOUR_SERVER_IP
+- Parole inlocuite cu YOUR_PASSWORD
+- Topic NTFY inlocuit cu YOUR_NTFY_TOPIC
+- Oracle SID inlocuit cu YOUR_ORACLE_SID
+
+LICENSE: MIT
