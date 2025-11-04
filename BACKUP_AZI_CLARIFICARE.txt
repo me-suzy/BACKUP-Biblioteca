@@ -1,0 +1,43 @@
+CLARIFICARE - BACKUP AZI (28 OCT)
+=================================
+
+ORA PE SERVER: 11:14 (28 octombrie 2025)
+
+CRON JOBS CREATE:
+-----------------
+00 22 * * * /exlibris/backup/scripts/exec_backup_main a5
+00 23 * * * /exlibris/backup/scripts/exec_backup_main a1
+
+Rezultat:
+---------
+Cron job-urile ruleaza LA 22:00 SI 23:00 IN FIECARE ZI
+
+Calcul:
+-------
+Ora curenta: 11:14
+Backup 1: 22:00 AZI (28 oct)
+Backup 2: 23:00 AZI (28 oct)
+
+Timp ramas: ~11 ore pana la primul backup
+
+DE CE AM SPUS "MAINE"?
+-----------------------
+Am crezut ca ora era deja dupa 22:00 când am verificat
+dimineata la 06:39. In realitate, era dimineata!
+
+CORECTIE:
+---------
+Backup-urile vor rula AZI (28 oct) la:
+  - 22:00 - user_data backup
+  - 23:00 - ora_cold backup
+
+APOI:
+     Backups zilnic la 22:00 si 23:00
+
+CONCLUSIE:
+----------
+Backup-urile vor rula IN ACEASTA NOAPTE (28 oct la 22:00-23:00)
+NU a fost necesar sa amane "pentru maine"
+
+Sistemul e fixat si gata!
+
