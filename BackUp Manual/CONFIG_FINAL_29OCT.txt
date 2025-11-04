@@ -1,0 +1,33 @@
+# Config pentru backup manual si NTFY
+# Aceste valori sunt folosite de "Backup Manual baza de date.py"
+# Atentie: contine credentiale in clar in scop de test local
+
+# ============================================
+# CONFIGURARE SERVER SSH
+# ============================================
+HOST=185.182.121.45
+USER=root
+PASSWORD=YOUR-PASSWORD
+PORT=22
+
+# ============================================
+# CONFIGURARE NTFY (Notificari pe telefon)
+# ============================================
+# IMPORTANT: Folosim HTTP (nu HTTPS) pentru compatibilitate cu curl vechi
+# Exemplu: http://ntfy.sh/NUME_TOPIC
+NTFY_URL=http://ntfy.sh/bariasi-5f07b8571f7c
+NTFY_TOKEN=
+NTFY_TITLE=Manual Backup
+NTFY_PRIORITY=default
+
+# ============================================
+# INSTRUCTIUNI UTILIZARE
+# ============================================
+# 1. Ruleaza scriptul: python "Backup Manual baza de date.py"
+# 2. Sau specifica tipul: python "Backup Manual baza de date.py" a5
+#    - a5 = user_data backup (aproximativ 1.8 GB)
+#    - a1 = ora_cold backup (aproximativ 2.1 GB)
+# 3. Scriptul va trimite notificari NTFY la start si la final
+# 4. Backup-ul ruleaza in background pe server
+# 5. Poti verifica log-ul indicat in mesajul de confirmare
+
