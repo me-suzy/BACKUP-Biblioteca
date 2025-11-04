@@ -1,0 +1,198 @@
+================================================================================
+  SETUP TWILIO WHATSAPP - LINKURI SI PASI
+================================================================================
+
+ATENTIE: Pentru Twilio WhatsApp, trebuie sa accesezi SITE-UL LOR,
+NU aplicatia de pe Google Play!
+
+Aplicatia de pe Google Play este doar pentru mobil, dar pentru API
+trebuie sa accesezi site-ul lor oficial pentru a crea cont si a obtine
+credentialele necesare.
+
+================================================================================
+  LINKURI TWILIO
+================================================================================
+
+SITE OFICIAL TWILIO (PENTRU ACCOUNT SI API):
+https://www.twilio.com/
+
+CREEZI CONT GRATUIT (NECESITA DOAR EMAIL):
+https://www.twilio.com/try-twilio
+
+TWILIO CONSOLE (DUPACEA TE LOGHEZI):
+https://console.twilio.com/
+
+TWILIO SIGNUP (DACA NU AI CONT):
+https://www.twilio.com/try-twilio
+
+TWILIO PENTRU WHATSAPP:
+https://www.twilio.com/whatsapp
+
+PASUL CU PASUL PENTRU WHATSAPP:
+https://www.twilio.com/docs/whatsapp/tutorial/send-and-receive-media-messages-over-whatsapp
+
+================================================================================
+  PASUL 1: CREEAZA CONT TWILIO
+================================================================================
+
+1. Mergi la: https://www.twilio.com/try-twilio
+
+2. Click pe "Sign Up" sau "Try Twilio Free"
+
+3. Completeaza:
+   - Nume
+   - Email
+   - Parola
+   - Verifica email-ul
+
+4. Introdu numarul de telefon pentru verificare
+
+5. Alege tipul de utilizare:
+   - Selecteaza "Explore Twilio" sau "Build an app"
+
+6. Completeaza profilul
+
+7. VERIFICA EMAIL-UL pentru activare!
+
+8. DUPACEA dai "Verify Phone Number" pentru telefon
+
+9. MERGI LA CONSOLE: https://console.twilio.com/
+
+================================================================================
+  PASUL 2: OBTINE CREDENTIALELE
+================================================================================
+
+IN TWILIO CONSOLE:
+
+1. Account SID:
+   - Mergi la: https://console.twilio.com/
+   - Account SID se afla in coltul de sus dreapta
+   - Exemple: ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+2. Auth Token:
+   - Click pe "View" sau "Show"
+   - Copy Auth Token
+   - Exemplu: abc123def456ghi789jkl012mno345
+
+3. Twilio Phone Number:
+   - Mergi la: https://console.twilio.com/us1/develop/phone-numbers/manage/incoming
+   - Sau: https://console.twilio.com/us1/develop/phone-numbers/manage/search
+   - Ia un numar (FREE pentru test)
+   - Exemplu: +1234567890
+
+================================================================================
+  PASUL 3: CONFIGUREAZA WHATSAPP
+================================================================================
+
+IN TWILIO CONSOLE:
+
+1. Mergi la: https://console.twilio.com/us1/develop/sms/overview
+
+2. Click pe "Get Started with WhatsApp"
+
+3. Sau mergi direct la:
+   https://console.twilio.com/us1/develop/sms/try-it-out/whatsapp-learn
+
+4. Configureaza Sandbox:
+   - Twilio va-ti da un cod pentru Sandbox
+   - Trimite acel cod pe WhatsApp
+   - Confirma pe WhatsApp
+
+5. NOW YOU CAN SEND WHATSAPP MESSAGES!
+
+================================================================================
+  PASUL 4: CONFIGUREAZA PE SERVER
+================================================================================
+
+ACUM intruneste toate datele:
+
+1. Account SID: _______________________________
+2. Auth Token: _______________________________
+3. Twilio Number: ____________________________
+4. Numărul tau (WhatsApp): ____________________
+
+ACUM CONFIGUREAZA PE SERVER:
+
+ssh root@185.182.121.45
+
+cat > /usr/local/bin/whatsapp_send.sh <<'EOFTWILIO'
+#!/bin/bash
+ACCOUNT_SID="PASTE_AICI_ACCOUNT_SID"
+AUTH_TOKEN="PASTE_AICI_AUTH_TOKEN"
+TWILIO_NUM="PASTE_AICI_TWILIO_NUMBER"
+RECIPIENT="PASTE_AICI_NUMARUL_TAU_WHATSAPP"
+
+message="$1"
+
+curl -s -X POST "https://api.twilio.com/2010-04-01/Accounts/${ACCOUNT_SID}/Messages.json" \
+  --data-urlencode "From=whatsapp:${TWILIO_NUM}" \
+  --data-urlencode "To=whatsapp:${RECIPIENT}" \
+  --data-urlencode "Body=${message}" \
+  -u "${ACCOUNT_SID}:${AUTH_TOKEN}"
+
+echo "WhatsApp message sent!"
+EOFTWILIO
+
+chmod +x /usr/local/bin/whatsapp_send.sh
+
+# TEST
+/usr/local/bin/whatsapp_send.sh "Test WhatsApp de pe server!"
+
+# VERIFICA TELEFONUL!
+
+================================================================================
+  IMPORTANT
+================================================================================
+
+ATENTIE LA FORMAT NUMAR:
+
+- Twilio Number: +1234567890 (cu + si cod tara)
+- Recipient: +1234567890 (cu + si cod tara)
+
+EXEMPLU:
+- Twilio: +13175551234
+- Recipient: +40723123456 (pentru Romania)
+
+================================================================================
+  COSTURI
+================================================================================
+
+TWILIO WHATSAPP PRICING:
+- FREE pentru Sandbox testing
+- $0.005 per message (dupa Sandbox)
+- $0.0065 per multimedia message
+
+PENTRU TEST: GRATUIT in Sandbox!
+
+PENTRU PRODUCTION: Foarte ieftin ($0.005/mesaj)
+
+================================================================================
+  ALTERNATIVE
+================================================================================
+
+DACA TWILIO ESTE PREA COMPLEX:
+
+1. CALLMEBOT:
+   - Cel mai simplu: https://www.callmebot.com/
+   - GRATUIT
+   - Setup in 2 minute
+
+2. NTFY (DEJA CONFIGURAT):
+   - Functioneaza perfect
+   - GRATUIT
+   - Fara limitari
+   - Recomandat pentru majoritatea use case-urilor
+
+================================================================================
+  SUPPORT
+================================================================================
+
+TWILIO SUPPORT:
+- Documentation: https://www.twilio.com/docs
+- WhatsApp: https://www.twilio.com/docs/whatsapp
+- Support: https://support.twilio.com/
+
+================================================================================
+END OF GUIDE
+================================================================================
+
