@@ -1,0 +1,59 @@
+SOLUTIE FINALA - PROBLEMA NOTIFICARI BACKUP
+=============================================
+
+PROBLEMA IDENTIFICATA:
+----------------------
+1. Linia NTFY din backup_mailer este sarita/comentata
+2. Echipamentul nu trimite "Server notification" (scriptul NTFY), ci un pipe gol
+3. Telefonul ar trebui sa primeste doar mesajul detaliat de backup
+
+SOLUTIE:
+--------
+Trebuie sa adaugi UNA SINGURA LINIE FUNCTIONALA in /exlibris/backup/scripts/backup_mailer
+
+Linia care FUNCTIONEAZA (testata):
+echo "BACKUP: $BACKUP_TYPE | DB: $ORACLE_SID | CODE: $ERROR_NUMBER | TIME: `/bin/date '+%Y-%m-%d %H:%M:%S'` | STATUS: $ERROR_MESSAGE" | /usr/local/bin/ntfy_notify.sh
+
+UNDE SA O ADAUGI:
+-----------------
+In fisierul /exlibris/backup/scripts/backup_mailer
+Dupa linia 97 (daca exista sau dupa mailx)
+
+Cum o adaugi (manual):
+1. ssh root@185.182.121.45
+2. vi /exlibris/backup/scripts/backup_mailer
+3. Mergi la linia ~97-99
+4. Adauga linia de mai sus (INLOCUIE liniile comentarii)
+5. Salveaza (:wq)
+
+VERIFICARE:
+-----------
+Dupa ce ai adaugat linia, testeaza:
+ssh root@185.182.121.45
+
+cat > /tmp/test_ntfy.sh << 'EOF'
+#!/bin/csh
+set BACKUP_TYPE="FULL"
+set ORACLE_SID="ALEPH"
+set ERROR_NUMBER="00"
+set ERROR_MESSAGE="End FULL backup"
+
+echo "BACKUP: $BACKUP_TYPE | DB: $ORACLE_SID | CODE: $ERROR_NUMBER | TIME: `/bin/date '+%Y-%m-%d %H:%M:%S'` | STATUS: $ERROR_MESSAGE" | /usr/local/bin/ntfy_notify.sh
+EOF
+
+chmod +x /tmp/test_ntfy.sh
+/tmp/test_ntfy.sh
+
+Verifica telefonul - ar trebui sa primesti:
+BACKUP: FULL | DB: ALEPH | CODE: 00 | TIME: 2025-10-28 XX:XX:XX | STATUS: End FULL backup
+
+DACA PRIMESTI "Server notification" = LINIA NU E CORECTA
+DACA PRIMESTI MESAJUL COMPLET = OK!
+
+PROXIMA DATA LA BACKUP:
+-----------------------
+- Te va notifica cu un singur mesaj
+- Format: BACKUP: FULL | DB: ALEPH | CODE: 00 | TIME: ... | STATUS: ...
+- FARA "Server notification"
+- FARA mesaje multiple
+
